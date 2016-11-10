@@ -4,15 +4,14 @@ namespace SoftUniBlogBundle\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Security\Core\Role\RoleInterface;
 
 /**
- * Role
+ * Category
  *
- * @ORM\Table(name="roles")
- * @ORM\Entity(repositoryClass="SoftUniBlogBundle\Repository\RoleRepository")
+ * @ORM\Table(name="categories")
+ * @ORM\Entity(repositoryClass="SoftUniBlogBundle\Repository\CategoryRepository")
  */
-class Role implements RoleInterface
+class Category
 {
     /**
      * @var int
@@ -33,9 +32,10 @@ class Role implements RoleInterface
     /**
      * @var ArrayCollection
      *
-     * @ORM\ManyToMany(targetEntity="SoftUniBlogBundle\Entity\User", mappedBy="roles")
+     * @ORM\OneToMany(targetEntity="SoftUniBlogBundle\Entity\Article", mappedBy="category")
      */
-    private $users;
+    private $articles;
+
 
     /**
      * Get id
@@ -52,7 +52,7 @@ class Role implements RoleInterface
      *
      * @param string $name
      *
-     * @return Role
+     * @return Category
      */
     public function setName($name)
     {
@@ -72,25 +72,29 @@ class Role implements RoleInterface
     }
 
     /**
-     * Returns the role.
-     *
-     * This method returns a string representation whenever possible.
-     *
-     * When the role cannot be represented with sufficient precision by a
-     * string, it should return null.
-     *
-     * @return string|null A string representation of the role, or null
+     * @return ArrayCollection
      */
-    public function getRole()
+    public function getArticles()
     {
-        return $this->getName();
+        return $this->articles;
+    }
+
+    /**
+     * @param ArrayCollection $articles
+     */
+    public function setArticles(ArrayCollection $articles)
+    {
+        $this->articles = $articles;
     }
 
     public function __construct()
     {
-        $this->users=new ArrayCollection();
+        $this->articles;
+    }
+
+    function __toString()
+    {
+        return $this->getName();
     }
 }
-
-
 

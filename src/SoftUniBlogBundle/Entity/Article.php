@@ -2,7 +2,11 @@
 
 namespace SoftUniBlogBundle\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Mapping\JoinColumn;
+use Doctrine\ORM\Mapping\JoinTable;
+use Doctrine\ORM\Mapping\ManyToMany;
 
 /**
  * Article
@@ -61,6 +65,33 @@ class Article
      * @ORM\JoinColumn(name="authorId", referencedColumnName="id")
      */
     private $author;
+
+    /**
+     * @var int
+     *
+     * @ORM\Column(name="category_id", type="integer")
+     */
+    private $categoryId;
+
+    /**
+     * @var Category
+     *
+     * @ORM\ManyToOne(targetEntity="SoftUniBlogBundle\Entity\Category", inversedBy="articles")
+     * @ORM\JoinColumn(name="category_id", referencedColumnName="id")
+     */
+    private $category;
+
+    /**
+     * @var ArrayCollection
+     *
+     * @ManyToMany(targetEntity="SoftUniBlogBundle\Entity\Tag", inversedBy="articles")
+     * @JoinTable(name="articles_tags",
+     *     joinColumns={@JoinColumn(name="article_id", referencedColumnName="id")},
+     *     inverseJoinColumns={@JoinColumn(name="tag_id", referencedColumnName="id")}
+     *     )
+     */
+    private $tags;
+
 
 
     /**
@@ -210,6 +241,56 @@ class Article
     public function __construct()
     {
         $this->dateAdded = new \DateTime('now');
+        $this->tags = new ArrayCollection();
     }
+
+    /**
+     * @return int
+     */
+    public function getCategoryId():int
+    {
+        return $this->categoryId;
+    }
+
+    /**
+     * @param int $categoryId
+     */
+    public function setCategoryId(int $categoryId)
+    {
+        $this->categoryId = $categoryId;
+    }
+
+    /**
+     * @return Category
+     */
+    public function getCategory()
+    {
+        return $this->category;
+    }
+
+    /**
+     * @param Category $category
+     */
+    public function setCategory($category)
+    {
+        $this->category = $category;
+    }
+
+    /**
+     * @return ArrayCollection
+     */
+    public function getTags()
+    {
+        return $this->tags;
+    }
+
+    /**
+     * @param ArrayCollection $tags
+     */
+    public function setTags($tags)
+    {
+        $this->tags = $tags;
+    }
+
 }
 

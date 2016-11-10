@@ -4,15 +4,14 @@ namespace SoftUniBlogBundle\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Security\Core\Role\RoleInterface;
 
 /**
- * Role
+ * Tag
  *
- * @ORM\Table(name="roles")
- * @ORM\Entity(repositoryClass="SoftUniBlogBundle\Repository\RoleRepository")
+ * @ORM\Table(name="tags")
+ * @ORM\Entity(repositoryClass="SoftUniBlogBundle\Repository\TagRepository")
  */
-class Role implements RoleInterface
+class Tag
 {
     /**
      * @var int
@@ -33,9 +32,10 @@ class Role implements RoleInterface
     /**
      * @var ArrayCollection
      *
-     * @ORM\ManyToMany(targetEntity="SoftUniBlogBundle\Entity\User", mappedBy="roles")
+     * @ORM\ManyToMany(targetEntity="SoftUniBlogBundle\Entity\Article", mappedBy="tags")
      */
-    private $users;
+    private $articles;
+
 
     /**
      * Get id
@@ -52,7 +52,7 @@ class Role implements RoleInterface
      *
      * @param string $name
      *
-     * @return Role
+     * @return Tag
      */
     public function setName($name)
     {
@@ -72,25 +72,29 @@ class Role implements RoleInterface
     }
 
     /**
-     * Returns the role.
-     *
-     * This method returns a string representation whenever possible.
-     *
-     * When the role cannot be represented with sufficient precision by a
-     * string, it should return null.
-     *
-     * @return string|null A string representation of the role, or null
+     * @return ArrayCollection
      */
-    public function getRole()
+    public function getArticles()
+    {
+        return $this->articles;
+    }
+
+    /**
+     * @param ArrayCollection $articles
+     */
+    public function setArticles($articles)
+    {
+        $this->articles = $articles;
+    }
+
+    public function __toString()
     {
         return $this->getName();
     }
 
     public function __construct()
     {
-        $this->users=new ArrayCollection();
+        $this->articles = new ArrayCollection();
     }
 }
-
-
 

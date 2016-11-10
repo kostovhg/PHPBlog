@@ -170,7 +170,7 @@ class User implements UserInterface
         foreach ($this->roles as $role)
         {
             /** @var $role Role */
-            $stringRoles[] = $role->getRole();
+            $stringRoles[] = is_string($role) ? $role : $role->getRole();
         }
         return $stringRoles;
     }
@@ -260,6 +260,15 @@ class User implements UserInterface
     public function isAdmin()
     {
         return in_array("ROLE_ADMIN", $this->getRoles());
+    }
+
+    /**
+     * @param array $roles
+     * @return $this
+     */
+    public function setRoles(array $roles){
+        $this->roles = $roles;
+        return $this;
     }
 
     public function __construct()

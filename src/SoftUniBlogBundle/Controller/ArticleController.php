@@ -2,9 +2,12 @@
 
 namespace SoftUniBlogBundle\Controller;
 
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\ORM\EntityManager;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use SoftUniBlogBundle\Entity\Article;
+use SoftUniBlogBundle\Entity\Tag;
 use SoftUniBlogBundle\Form\ArticleType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
@@ -29,8 +32,14 @@ class ArticleController extends Controller
 
         if ($form->isSubmitted() && $form->isValid()){
 
-            $article->setAuthor($this->getUser());
             $em = $this->getDoctrine()->getManager();
+
+            $tagsString = $request->get('tags');
+            $tags = $this->getTags($em, $tagsString);
+
+            $article->setAuthor($this->getUser());
+            $article->setTags($tags);
+
             $em->persist($article);
             $em->flush();
 
@@ -54,6 +63,34 @@ class ArticleController extends Controller
     }
 
     /**
+     * @param $em EntityManager
+     * @param $tagsString String
+     *
+     * @return ArrayCollection
+     */
+    private function getTags($em, $tagsString)
+    {
+        $tags = explode(",", $tagsString);
+        $tagRepo = $this->getDoctrine()->getRepository(Tag::class);
+        $tagsToSave = new ArrayCollection();
+
+        foreach ($tags as $tagName){
+            $tagName = trim($tagName);
+            $tag = $tagRepo->findOneBy(['name' => $tagName]);
+
+            if ($tag == null){
+                $tag = new Tag();
+                $tag->setName($tagName);
+                $em->persist($tag);
+            }
+
+            $tagsToSave->add($tag);
+        }
+
+        return $tagsToSave;
+    }
+
+    /**
      * @Route("/article/edit/{id}", name="article_edit")
      * @Security("is_granted('IS_AUTHENTICATED_FULLY')")
      *
@@ -69,6 +106,10 @@ class ArticleController extends Controller
             return $this->redirectToRoute("blog_index");
         }
 
+        $tags = $article->getTags();
+
+        $tagsString = implode(', ', $tags->toArray());
+
         $currentUser=$this->getUser();
 
         if (!$currentUser->isAuthor($article) && !$currentUser->isAdmin())
@@ -83,6 +124,12 @@ class ArticleController extends Controller
         if($form->isSubmitted() && $form->isValid())
         {
             $em = $this->getDoctrine()->getManager();
+
+            $tagsString = $request->get('tags');
+            $tags = $this->getTags($em, $tagsString);
+
+            $article->setTags($tags);
+
             $em->persist($article);
             $em->flush();
 
@@ -90,8 +137,9 @@ class ArticleController extends Controller
         }
 
         return $this->render('article/edit.html.twig',
-            array('article' => $article,
-                'form' => $form->createView()));
+            ['article' => $article,
+                'form' => $form->createView(),
+                'tags' => $tagsString]);
 
     }
 
@@ -112,6 +160,10 @@ class ArticleController extends Controller
             return $this->redirectToRoute("blog_index");
         }
 
+        $tags = $article->getTags();
+
+        $tagsString = implode(", ", $tags->toArray());
+
         $currentUser = $this->getUser();
 
         if (!$currentUser->isAuthor($article) && !$currentUser->isAdmin())
@@ -126,13 +178,20 @@ class ArticleController extends Controller
         if($form->isSubmitted() && $form->isValid())
         {
             $em = $this->getDoctrine()->getManager();
+
+            $tagsString = $request->get('tags');
+            $tags = $this->getTags($em, $tagsString);
+            $article->getTags($tags);
             $em->remove($article);
             $em->flush();
 
             return $this->redirectToRoute('blog_index');
         }
 
-        return $this->render('article/delete.html.twig', array('article'=> $article, 'form'=>$form->createView()));
+        return $this->render('article/delete.html.twig',
+            array('article'=> $article,
+                'form'=>$form->createView(),
+                'tags'=>$tagsString));
     }
 
 
